@@ -1,20 +1,26 @@
 <head>
-  <title>Astrophysics</title>
+  <title>Fun with orbits</title>
   <script type="text/javascript" async
   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
 </head>
 <body>
-<h1>Kepler's first law</h1>
-<p>
-  Kerpler's first law states that the motion of a planet is an ellipse with the sun as one of it's foci:
-  $$r = {p \over 1 + \epsilon \cos(\theta)}$$
-  Newton's universal gravitation law is:
-  $$F = {{GM_1M_2} \over {r^2}}$$
-  It can be then derived that:
-  $$r = {}$$
-</p>
-<p>
-  Here is a simulation with fictional objects forming a binary system. First, the eccentricity of the ellipse interpolates from almost 0 to 0.8 (arbitrary), then the mass of \(M_1\) will start increasing with time and we can see the effect on the motion of the system.
-  <img src="newton-kepler-orbit-2.gif"></img>
-</p>
+  <h1>Kepler's first law</h1>
+  <p><a href="https://github.com/sthilaid/astrophys">python sourcecode here</a></p>
+  <p>
+    Kerpler's first law states that the motion of a planet is an ellipse with the sun as one of it's foci:
+    $$r = {p \over 1 + \epsilon \cos(\theta)}$$
+    Newton's universal gravitation law is:
+    $$F = {{GM_1M_2} \over {r^2}}$$
+    It can be then derived that:
+    $$r = \frac{L^2 / \mu^2}{GM (1 + \epsilon \cos{\theta})}$$
+    where \(L\) is the orbital angular momentum, \(\mu = \frac{M_1M_2}{M_1+M_2}\), \(G = 6.6742867e-11 Nm^2kg^{-2}\), \(M = M_1+M_2\), \(\epsilon\) is the elliptical motion eccentricity and \(\theta\) is the angle from the focus (sun) to the orbit's aphelion.\
+  </p>
+  <p>
+    Here is the motion of to identical mass objects forming a binary system. We increase the ecentricity of the orbital elipse to emphasize the difference in motion of diffrent \(\epsilon\) values.
+    <img src="newton-kepler-orbit-emod.gif"></img>
+  </p>
+  <p>
+    Here \(\epsilon\) is fixed to 0.6, and we gradually increase the mass of \(M_1\) (the yellow object).
+    <img src="newton-kepler-orbit-massmod.gif"></img>
+  </p>
 </body>
