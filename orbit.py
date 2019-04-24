@@ -53,6 +53,15 @@ class BinarySystem():
         r = self.r(theta)
         return self.mu / self.m2 * r
 
+def make_video(screen):
+    image_num = 0
+    while True:
+        yield
+        image_num += 1
+        str_num = "000" + str(image_num)
+        file_name = "images/image" + str_num[-4:] + ".jpg"
+        pygame.image.save(screen, file_name)
+
 def printLabel(font, screen, msg, x, y, color):
     fontSurface = font.render(msg, False, color)
     (labelW, labelH) = fontSurface.get_size()
@@ -92,12 +101,12 @@ def go():
     # SolarMass   = 1.9891e30 # kg
     # EarthMass   = 5.9736e24 # kg
     # L = 29800 * EarthMass # 29.8 km/s
-    # earthSun  = BinarySystem(SolarMass, EarthMass, L, 0.0167)
+    # binary  = BinarySystem(SolarMass, EarthMass, L, 0.0167)
 
-    m1          = 1
+    m1          = 5
     m2          = 1
     L           = 10
-    eccentricity=0.01
+    eccentricity=0.6
     binary      = BinarySystem(m1, m2, L, eccentricity)
 
     sizeX, sizeY = (800, 600)
@@ -109,12 +118,15 @@ def go():
 
     drawGhosts  = True
     drawInfos   = True
+    renderVideo = False
     
     with PyGameApp(sizeX, sizeY, "orbit") as pyg:
         clock=pygame.time.Clock()
 
         pygame.font.init()
         font = pygame.font.SysFont('Arial', 12)
+
+        videoMaker = make_video(pyg.screen)
      
         # -------- Main Program Loop -----------
         done=False
@@ -143,6 +155,10 @@ def go():
                     motionScreenRatio = max(motionScreenRatio - 0.1, 0.1)
                     halfMotionScreenSize, renderCenter = computeDrawVariables(binary, sizeX, sizeY, motionScreenRatio)
 
+                elif (event.type == pygame.KEYDOWN and event.key == pygame.K_v):
+                    renderVideo = not renderVideo
+                    print("renderVideo: %s" % renderVideo)
+
                 elif (event.type == pygame.KEYDOWN and event.key == pygame.K_r):
                     angle       = 0
                     m1          = 1
@@ -155,7 +171,6 @@ def go():
                     lastPos = [False for i in range(50)]
                     lastPosIndex = 0
 
-
             # draw
             pyg.screen.fill(black)
 
@@ -164,8 +179,9 @@ def go():
             relR1, relR2 = (np.interp(r1, [-aphelion, aphelion], [-halfMotionScreenSize, halfMotionScreenSize]),
                             np.interp(r2, [-aphelion, aphelion], [-halfMotionScreenSize, halfMotionScreenSize]))
 
-            # print("ap: %e, pe: %e, r1: %e, r2: %e, angle: %.2f" % (aphelion, perihelion, r1, r2, angle))
+            # print("ap: %.2e, pe: %.2e, r1: %.2e, r2: %.2e, angle: %.2f" % (aphelion, perihelion, r1, r2, angle))
 
+            #print("relR1: %.2f, cos: %.2f" % (relR1, np.cos(angle)))
             x1, y1 = (int(relR1 * np.cos(angle) + renderCenter[0]), int(relR1 * np.sin(angle)) + renderCenter[1])
             x2, y2 = (int(relR2 * np.cos(angle) + renderCenter[0]), int(relR2 * np.sin(angle)) + renderCenter[1])
 
@@ -176,27 +192,29 @@ def go():
             
             angle   = angle + radialSpeed * dt
 
-            if binary.e < 0.8:
-                binary.e = np.interp(angle, [0, np.pi*8], [0.01, 0.8])
-            else:
-                binary.m1 = np.interp(angle, [0, np.pi*2], [m1, 2*m1])
-                if angle > np.pi * 2:
-                    angle = 0
-                    m1 = binary.m1
-            binary.initialize()
-            halfMotionScreenSize, renderCenter = computeDrawVariables(binary, sizeX, sizeY, motionScreenRatio)
+            # if binary.e < 0.9:
+            #     binary.e = np.interp(angle, [0, np.pi*6], [0.01, 0.99])
+            # else:
+            #     done = True
+            # else:
+            # binary.m1 = np.interp(angle, [0, np.pi*2], [m1, 2*m1])
+            # if angle > np.pi * 2:
+            #     angle = 0
+            #     m1 = binary.m1
+            # binary.initialize()
+            # halfMotionScreenSize, renderCenter = computeDrawVariables(binary, sizeX, sizeY, motionScreenRatio)
 
             # infos
             if drawInfos:
-                fontSurface = font.render("m1: %e" % binary.m1, False, white)
+                fontSurface = font.render("m1", False, white)
                 pyg.screen.blit(fontSurface, (x1, y1 + 5))
 
-                fontSurface = font.render("m2: %e" % binary.m2, False, white)
+                fontSurface = font.render("m2", False, white)
                 pyg.screen.blit(fontSurface, (x2, y2 + 5))
 
                 infoLabel   = "Binary system motion according to Kepler's 1st law as derived by Newton's equation's of Universal gravitation."
-                infoLabel2  = "system info: m1: %eg, m2: %eg, L: %em/s, e: %.2f" % (binary.m1, binary.m2, binary.L, binary.e)
-                infoLabel3  = "aphelion: %e, perihelion: %e" % (binary.aphelion, binary.perihelion)
+                infoLabel2  = "system info: m1: %.2eg, m2: %.2eg, L: %.2em/s, e: %.2f" % (binary.m1, binary.m2, binary.L, binary.e)
+                infoLabel3  = "aphelion: %.2em, perihelion: %.2em" % (binary.aphelion, binary.perihelion)
 
                 printLabel(font, pyg.screen, infoLabel, sizeX * 0.5, sizeY * 0.9, white)
                 printLabel(font, pyg.screen, infoLabel2, sizeX * 0.5, sizeY * 0.9 + 13, white)
@@ -222,3 +240,7 @@ def go():
                 
             pygame.display.flip()
             clock.tick(fps)
+
+            # save video
+            if renderVideo:
+                next(videoMaker)
