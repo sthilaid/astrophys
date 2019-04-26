@@ -91,23 +91,30 @@ def go():
     red      = ( 255,   0,   0)
     yellow   = ( 255, 255,   0)
 
-    fps     = 20
-    dt      = 1.0 / fps
-    angle   = 0.0
+    fps         = 20
+    dt          = 1.0 / fps
+    angle       = 0.0
     radialSpeed = np.radians(90.0) # deg/s -> rad/s
     
     # elipse  = Elipse(400, 0.6)
 
-    # SolarMass   = 1.9891e30 # kg
-    # EarthMass   = 5.9736e24 # kg
-    # L = 29800 * EarthMass # 29.8 km/s
-    # binary  = BinarySystem(SolarMass, EarthMass, L, 0.0167)
+    oneYear             = 365.25 * 24 * 60 * 60
+    SolarMass           = 1.9891e30 # kg
+    EarthMass           = 5.9736e24 # kg
+    # EarthSunDistance    = 149.6e9   # m
+    # EarthOrbitalSpeed   = 2 * np.pi * EarthSunDistance / oneYear
+    # L           = EarthOrbitalSpeed * EarthMass * EarthSunDistance # m/s
+    # binary      = BinarySystem(SolarMass, EarthMass, L, 0.0167)
+    # timeScale   = oneYear / 5
 
     m1          = 5
     m2          = 1
-    L           = 10
-    eccentricity=0.6
+    L           = 1
+    eccentricity= 0.6
     binary      = BinarySystem(m1, m2, L, eccentricity)
+    motionA     = (binary.perihelion + binary.aphelion) * 0.5
+    P           = 4 * np.pi * np.pi * motionA * motionA * motionA / (binary.G * binary.m1 * binary.m2)
+    timeScale   = P / 5
 
     sizeX, sizeY = (800, 600)
     motionScreenRatio = 0.5
@@ -189,8 +196,12 @@ def go():
             pygame.gfxdraw.filled_circle(pyg.screen, x2, y2, 5, white)
 
             # update data
-            
-            angle   = angle + radialSpeed * dt
+
+            r       = binary.r(angle)
+            scaledDT     = dt * timeScale
+            dAngle  = binary.L * scaledDT / (binary.mu * r * r)
+            print("L: %.2e, r: %.2e, scaledDT: %.2e, mu: %.2e, dAngle: %.2e" % (binary.L, r, scaledDT, binary.mu, dAngle))
+            angle   = angle + dAngle
 
             # if binary.e < 0.9:
             #     binary.e = np.interp(angle, [0, np.pi*6], [0.01, 0.99])
