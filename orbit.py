@@ -41,6 +41,8 @@ class BinarySystem():
         self.mu         = self.m1 * self.m2 / self.M
         self.perihelion = np.maximum(self.r1(0), self.r2(0))
         self.aphelion   = np.maximum(self.r1(np.pi), self.r2(np.pi))
+        motionA         = (self.aphelion + self.perihelion) * 0.5
+        self.P          = np.sqrt(4 * np.pi * np.pi * motionA * motionA * motionA / (self.G * (self.m1 + self.m2)))
 
     def r(self, theta):
         return np.power(self.L, 2) / (np.power(self.mu, 2) * self.G * self.M * (1 + self.e * np.cos(theta)))
@@ -98,23 +100,21 @@ def go():
     
     # elipse  = Elipse(400, 0.6)
 
-    oneYear             = 365.25 * 24 * 60 * 60
-    SolarMass           = 1.9891e30 # kg
-    EarthMass           = 5.9736e24 # kg
+    # P                   = 365.25 * 24 * 60 * 60
+    # SolarMass           = 1.9891e30 # kg
+    # EarthMass           = 5.9736e24 # kg
     # EarthSunDistance    = 149.6e9   # m
-    # EarthOrbitalSpeed   = 2 * np.pi * EarthSunDistance / oneYear
+    # EarthOrbitalSpeed   = 2 * np.pi * EarthSunDistance / P
     # L           = EarthOrbitalSpeed * EarthMass * EarthSunDistance # m/s
     # binary      = BinarySystem(SolarMass, EarthMass, L, 0.0167)
-    # timeScale   = oneYear / 5
+    # timeScale   = P / 5
 
-    m1          = 5
+    m1          = 2
     m2          = 1
     L           = 1
     eccentricity= 0.6
     binary      = BinarySystem(m1, m2, L, eccentricity)
-    motionA     = (binary.perihelion + binary.aphelion) * 0.5
-    P           = 4 * np.pi * np.pi * motionA * motionA * motionA / (binary.G * binary.m1 * binary.m2)
-    timeScale   = P / 5
+    timeScale   = binary.P / 2
 
     sizeX, sizeY = (800, 600)
     motionScreenRatio = 0.5
@@ -125,13 +125,14 @@ def go():
 
     drawGhosts  = True
     drawInfos   = True
-    renderVideo = False
+    renderVideo = True
     
     with PyGameApp(sizeX, sizeY, "orbit") as pyg:
         clock=pygame.time.Clock()
 
+        fontSize = 14
         pygame.font.init()
-        font = pygame.font.SysFont('Arial', 12)
+        font = pygame.font.SysFont('Arial', fontSize)
 
         videoMaker = make_video(pyg.screen)
      
@@ -196,12 +197,11 @@ def go():
             pygame.gfxdraw.filled_circle(pyg.screen, x2, y2, 5, white)
 
             # update data
-
             r       = binary.r(angle)
-            scaledDT     = dt * timeScale
+            scaledDT= dt * timeScale
             dAngle  = binary.L * scaledDT / (binary.mu * r * r)
-            print("L: %.2e, r: %.2e, scaledDT: %.2e, mu: %.2e, dAngle: %.2e" % (binary.L, r, scaledDT, binary.mu, dAngle))
             angle   = angle + dAngle
+            # print("L: %.2e, r: %.2e, scaledDT: %.2e, mu: %.2e, dAngle: %.2e" % (binary.L, r, scaledDT, binary.mu, dAngle))
 
             # if binary.e < 0.9:
             #     binary.e = np.interp(angle, [0, np.pi*6], [0.01, 0.99])
@@ -223,13 +223,14 @@ def go():
                 fontSurface = font.render("m2", False, white)
                 pyg.screen.blit(fontSurface, (x2, y2 + 5))
 
-                infoLabel   = "Binary system motion according to Kepler's 1st law as derived by Newton's equation's of Universal gravitation."
-                infoLabel2  = "system info: m1: %.2eg, m2: %.2eg, L: %.2em/s, e: %.2f" % (binary.m1, binary.m2, binary.L, binary.e)
-                infoLabel3  = "aphelion: %.2em, perihelion: %.2em" % (binary.aphelion, binary.perihelion)
+                infoLabel   = "Binary system motion"
+                infoLabel2  = "m1: %.2eg, m2: %.2eg, L: %.2em/s, e: %.2f" % (binary.m1, binary.m2, binary.L, binary.e)
+                infoLabel3  = ("Period: %.2es (%.2edays) time scale: %.2e, aphelion: %.2em, perihelion: %.2em"
+                               % (binary.P, binary.P / (60.0*60.0*24), timeScale, binary.aphelion, binary.perihelion))
 
                 printLabel(font, pyg.screen, infoLabel, sizeX * 0.5, sizeY * 0.9, white)
-                printLabel(font, pyg.screen, infoLabel2, sizeX * 0.5, sizeY * 0.9 + 13, white)
-                printLabel(font, pyg.screen, infoLabel3, sizeX * 0.5, sizeY * 0.9 + 13*2, white)
+                printLabel(font, pyg.screen, infoLabel2, sizeX * 0.5, sizeY * 0.9 + (fontSize+2), white)
+                printLabel(font, pyg.screen, infoLabel3, sizeX * 0.5, sizeY * 0.9 + (fontSize+2)*2, white)
 
             # save ghost in circular buffer
             lastPos[lastPosIndex] = (x1, x2, y1, y2)

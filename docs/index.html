@@ -4,7 +4,7 @@
   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
 </head>
 <body>
-  <h1>Kepler's first law</h1>
+  <h1>Kepler's Laws as derived from Newton's equations</h1>
   <p><a href="https://github.com/sthilaid/astrophys">python sourcecode here</a></p>
   <p>
     Kerpler's first law states that the motion of a planet is an ellipse with the sun as one of it's foci:
@@ -17,10 +17,58 @@
   </p>
   <p>
     Here is the motion of to identical mass objects forming a binary system. We increase the ecentricity of the orbital elipse to emphasize the difference in motion of diffrent \(\epsilon\) values.
+  </p>
+  <p>
     <img src="newton-kepler-orbit-emod.gif"></img>
   </p>
   <p>
     Here \(\epsilon\) is fixed to 0.6, and we gradually increase the mass of \(M_1\) (the yellow object).
+  </p>
+  <p>
     <img src="newton-kepler-orbit-massmod.gif"></img>
+  </p>
+  <p>
+    Up to this point, the orbital velocity was constant (\(v_\theta =
+    \pi/4 \text{ rad/s}\)). Using Kepler's second law as derived from Newton's equations,
+    we can extract the proper orbital velocity of a binary system:
+
+    $$\frac{\delta A}{\delta t} = \frac{r \delta r \delta \theta}{\delta t} = \frac{1}{2} \frac{L}{\mu}$$
+    $$\frac{\delta\theta}{\delta t} = \frac{L}{\mu r^2}\delta t \rightarrow \theta = \frac{Lt}{\mu r^2}$$
+
+    One caveat of using the proper angular velocity is that depending on the
+    inputs, namely the angular monentum \(L\), then if we continue simulation in
+    real-time the system, then a full orbit will take the orbital period
+    \(P\). For instance, a system simulating the Earth orbiting the Sun would
+    take 365.25 days to display the full orbit!
+
+    Fortunately, using Kepler's Third Law as derived from Newton's equations:
+
+    $$P^2 = \frac{4 \pi^2}{G(m_1+m_2)}a^3$$
+
+    once we know the period, we can apply a timescale proportional to the time
+    period to display a full orbit in seconds. Here is an example of a binary
+    system with small and similar masses:
+  </p>
+  <p>
+    <img src="newton-kepler-orbit-speed.gif"></img>
+    <!-- <video width="800" height="600" controls> -->
+    <!--   <source src="newton-kepler-orbit-speed.mp4" type="video/mp4"> -->
+    <!-- </video> -->
+  </p>
+  <p>
+    Although the period of that system is about \(5.62 * 10^{15} \text{ days}\),
+    we can properly time scale it and display the orbit and notice the
+    acceleration when the masses passes close to the center of mass such that
+    the area from the cener of mass to the moving body's motion is constant (as
+    stated by Kepler's second law).
+  </p>
+  <p>
+    Here is another example using the Earth and the Sun:
+  </p>
+  <p>
+    <img src="newton-kepler-orbit-earth.gif"></img>
+    <!-- <video width="800" height="600" controls> -->
+    <!--   <source src="newton-kepler-orbit-earth.mp4" type="video/mp4"> -->
+    <!-- </video> -->
   </p>
 </body>
